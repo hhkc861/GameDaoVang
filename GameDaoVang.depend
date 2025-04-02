@@ -1,0 +1,70 @@
+# depslib dependency file v1.0
+1742800702 source:d:\codeblocks\gamedaovang\gameobject.cpp
+	"GameObject.h"
+
+1742800702 d:\codeblocks\gamedaovang\gameobject.h
+	<SDL.h>
+
+1742800702 source:d:\codeblocks\gamedaovang\gold.cpp
+	"Gold.h"
+	<SDL_image.h>
+	<cstdlib>
+	<ctime>
+	<vector>
+	<iostream>
+
+1742800702 d:\codeblocks\gamedaovang\gold.h
+	"GameObject.h"
+	<SDL.h>
+	<vector>
+
+1742804560 source:d:\codeblocks\gamedaovang\main.cpp
+	<SDL.h>
+	<SDL_image.h>
+	<iostream>
+	<vector>
+	<ctime>
+	<algorithm>
+	"GameObject.h"
+	"Rope.h"
+	"Gold.h"
+	"Stone.h"
+
+1742798601 d:\codeblocks\gamedaovang\player.h
+	"GameObject.h"
+	"Rope.h"
+
+1742803184 d:\codeblocks\gamedaovang\rope.h
+	"GameObject.h"
+	"Gold.h"
+	<SDL.h>
+
+1742798601 source:d:\codeblocks\gamedaovang\player.cpp
+	"Player.h"
+	<iostream>
+
+1742803595 source:d:\codeblocks\gamedaovang\rope.cpp
+	<SDL.h>
+	<SDL_image.h>
+	<iostream>
+	<vector>
+	<ctime>
+	<algorithm>
+	"GameObject.h"
+	"Rope.h"
+	"Gold.h"
+	"Stone.h"
+
+1742800702 source:d:\codeblocks\gamedaovang\stone.cpp
+	"Stone.h"
+	<SDL_image.h>
+	<cstdlib>
+	<ctime>
+	<vector>
+	<iostream>
+
+1742800702 d:\codeblocks\gamedaovang\stone.h
+	"GameObject.h"
+	<SDL.h>
+	<vector>
+
