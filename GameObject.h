@@ -9,9 +9,9 @@ public:
     SDL_Rect rect;
 
     GameObject(SDL_Texture* tex, int x, int y, int w, int h);
-    virtual ~GameObject() {} // Virtual destructor for proper inheritance cleanup
-
-    virtual void render(SDL_Renderer* renderer) const; // <----- IMPORTANT:  'const' keyword here
+    virtual ~GameObject() = default;
+    virtual void render(SDL_Renderer* renderer) const;
+    virtual void update(){};
 };
 
 #endif

@@ -1,191 +1,111 @@
-#define SDL_MAIN_HANDLED
-#include <SDL.h>
-#include <SDL_image.h>
-#include <iostream>
-#include <vector>
-#include <ctime>
-#include <algorithm> // For std::remove_if
-
-#include "GameObject.h"
+// Rope.cpp
 #include "Rope.h"
-#include "Gold.h"
-#include "Stone.h"
+#include <cmath>
+#include <iostream>
+#include "constants.h"
 
-// Kích thước cửa sổ
-const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 600;
+using namespace std;
 
-int main(int argc, char* argv[]) {
-    // Khởi tạo SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
-        return 1;
-    }
+Rope::Rope(SDL_Texture* tex, int x, int y, int w, int h) : GameObject(tex, x, y, w, h),
+length(0), maxLength(SCREEN_HEIGHT - y), speed(10), // maxLength based on screen height
+isExtending(false), isRetracting(false), attachedGold(nullptr), attachedStone(nullptr){}
 
-    // Tạo cửa sổ
-    SDL_Window* window = SDL_CreateWindow("Gold Miner", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-    if (window == nullptr) {
-        std::cerr << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-        return 1;
-    }
+void Rope::extend() {
+    isExtending = true;
+    isRetracting = false;
+    isAttached = false;
+    length = 0;
+}
 
-    // Tạo renderer
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    if (renderer == nullptr) {
-        std::cerr << "Renderer could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-        return 1;
-    }
+void Rope::retract() {
+    isRetracting = true;
+    isExtending = false;
+}
 
-    // Khởi tạo SDL_image (hỗ trợ cả PNG và JPG)
-    int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
-    if (!(IMG_Init(imgFlags) & imgFlags)) {
-        std::cerr << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError() << std::endl;
-        return 1;
-    }
+void Rope::update() {
+    if (isExtending) {
+        length += speed;
+        if (length >= maxLength) {
+            isExtending = false;
+            retract(); // Start retracting automatically when max length is reached
+        }
+    } else if (isRetracting) {
+        length -= speed;
 
-    // Load texture ảnh nền (background.jpg)
-    SDL_Surface* tmpSurfaceBackground = IMG_Load("background.jpg");
-    if (tmpSurfaceBackground == nullptr) {
-        std::cerr << "Failed to load background texture! SDL Error: " << IMG_GetError() << std::endl;
-        return 1;
-    }
-    SDL_Texture* backgroundTexture = SDL_CreateTextureFromSurface(renderer, tmpSurfaceBackground);
-    SDL_FreeSurface(tmpSurfaceBackground);
-    if (backgroundTexture == nullptr) {
-        std::cerr << "Failed to create background texture! SDL Error: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-
-    // Load texture dây
-    SDL_Surface* tmpSurfaceRope = SDL_CreateRGBSurface(0, 4, 4, 32, 0, 0, 0, 0);
-    SDL_FillRect(tmpSurfaceRope, NULL, SDL_MapRGB(tmpSurfaceRope->format, 255, 255, 255));
-    SDL_Texture* ropeTexture = SDL_CreateTextureFromSurface(renderer, tmpSurfaceRope);
-    SDL_FreeSurface(tmpSurfaceRope);
-    if (ropeTexture == nullptr) {
-        std::cerr << "Failed to create rope texture! SDL Error: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-
-    // Load texture đá (vẫn dùng player.png cho đá)
-    SDL_Surface* tmpSurfaceStone = IMG_Load("player.png");
-    if (tmpSurfaceStone == nullptr) {
-        std::cerr << "Failed to load stone texture! SDL Error: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-    SDL_Texture* stoneTexture = SDL_CreateTextureFromSurface(renderer, tmpSurfaceStone);
-    SDL_FreeSurface(tmpSurfaceStone);
-    if (stoneTexture == nullptr) {
-        std::cerr << "Failed to create stone texture! SDL Error: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-
-    // Load texture vàng
-    SDL_Surface* tmpSurfaceGold = IMG_Load("gold.png");
-    if (tmpSurfaceGold == nullptr) {
-        std::cerr << "Failed to load gold texture! SDL Error: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-    SDL_Texture* goldTexture = SDL_CreateTextureFromSurface(renderer, tmpSurfaceGold);
-    SDL_FreeSurface(tmpSurfaceGold);
-    if (goldTexture == nullptr) {
-        std::cerr << "Failed to create gold texture! SDL Error: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-
-
-    // Tạo Rope ở giữa phía trên màn hình
-    Rope rope(ropeTexture, SCREEN_WIDTH / 2 - 2, 50, 4, 0);
-
-    // Tạo vàng và đá
-    srand(time(0));
-    std::vector<Gold> golds;
-    std::vector<Stone> stones;
-    std::vector<SDL_Rect> objectRects;
-
-    for (int i = 0; i < 10; ++i) {
-        Gold newGold = Gold::createRandomGold(renderer, objectRects);
-        newGold.texture = goldTexture;
-        golds.push_back(newGold);
-        objectRects.push_back(newGold.rect);
-    }
-    for (int i = 0; i < 5; ++i) {
-        Stone newStone = Stone::createRandomStone(renderer, objectRects);
-        newStone.texture = stoneTexture;
-        stones.push_back(newStone);
-        objectRects.push_back(newStone.rect);
-    }
-
-    bool quit = false;
-    SDL_Event e;
-    Gold* grabbedGold = nullptr;
-
-    while (!quit) {
-        while (SDL_PollEvent(&e) != 0) {
-            if (e.type == SDL_QUIT) {
-                quit = true;
-            }
-            if (e.type == SDL_KEYDOWN) {
-                if (e.key.keysym.sym == SDLK_SPACE) {
-                    if (!rope.isExtending && !rope.isRetracting) {
-                        rope.extend();
-                    }
-                }
-            }
+        if (attachedGold != nullptr){
+            attachedGold->rect.y = rect.y + length - attachedGold->rect.h;
+        }
+        if (attachedStone != nullptr){
+            attachedStone->rect.y = rect.y + length - attachedStone->rect.h;
         }
 
-        // Kiểm tra va chạm với vàng khi dây đang kéo dài
-        if (rope.isExtending && grabbedGold == nullptr) {
-            Gold* collidedGold = rope.checkCollision(golds);
-            if (collidedGold != nullptr) {
-                grabbedGold = collidedGold;
-                rope.attachedGold = grabbedGold;
-                rope.retract();
-            }
+        if (length <= 0) {
+            isRetracting = false;
+            length = 0;
+            attachedGold = nullptr;
+            attachedStone = nullptr;
+        }
+    }
+}
+
+void Rope::render(SDL_Renderer* renderer) const {
+    if (texture == nullptr) return;
+
+    SDL_Rect renderRect = {rect.x, rect.y, rect.w, length};
+    SDL_RenderCopy(renderer, texture, nullptr, &renderRect);
+
+    if (isExtending || isRetracting) {
+        // Render grabbed gold at the end of the rope during extending/retracting
+        if (attachedGold != nullptr) {
+            SDL_Rect goldRenderRect = attachedGold->rect;
+            goldRenderRect.x = rect.x + rect.w / 2 - goldRenderRect.w / 2; // Center gold horizontally with rope
+            goldRenderRect.y = rect.y + length - goldRenderRect.h; // Attach gold to the end of the rope
+            attachedGold->render(renderer); // Use gold's render function
+        }
+        if (attachedStone != nullptr) {
+            SDL_Rect stoneRenderRect = attachedStone->rect;
+            stoneRenderRect.x = rect.x + rect.w / 2 - stoneRenderRect.w / 2; // Center gold horizontally with rope
+            stoneRenderRect.y = rect.y + length - stoneRenderRect.h; // Attach gold to the end of the rope
+            attachedStone->render(renderer); // Use gold's render function
         }
 
-        // Cập nhật game
-        rope.update();
-
-        // Khi dây thu lại hoàn tất và đã gắp được vàng, loại bỏ vàng
-        if (!rope.isExtending && !rope.isRetracting && grabbedGold != nullptr) {
-            golds.erase(std::remove_if(golds.begin(), golds.end(),
-                                        [&](const Gold& gold) { return &gold == grabbedGold; }),
-                        golds.end());
-            grabbedGold = nullptr;
-        }
-
-        // Render
-        SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
-
-        for (const auto& gold : golds) {
-            gold.render(renderer);
-        }
-        for (const auto& stone : stones) {
-            stone.render(renderer);
-        }
-        rope.render(renderer);
-
-        SDL_RenderPresent(renderer);
-        SDL_Delay(16);
     }
 
-    // Giải phóng tài nguyên
-    SDL_DestroyTexture(backgroundTexture);
-    SDL_DestroyTexture(ropeTexture);
-    SDL_DestroyTexture(goldTexture);
-    SDL_DestroyTexture(stoneTexture);
-    for (const auto& gold : golds) {
-        SDL_DestroyTexture(gold.texture);
-    }
-    for (const auto& stone : stones) {
-        SDL_DestroyTexture(stone.texture);
-    }
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    IMG_Quit();
-    SDL_Quit();
+}
 
-    return 0;
+Gold* Rope::checkCollision(vector<Gold>& golds) { // <---- Thay đổi kiểu trả về thành const Gold*
+    if (!isExtending) return nullptr; // Only check collision when extending
+
+    SDL_Rect ropeEndRect;
+    ropeEndRect.x = rect.x - 5; // Adjust for width of rope and collision detection
+    ropeEndRect.y = rect.y + length - 5; // End of rope
+    ropeEndRect.w = 10; // Width for collision check
+    ropeEndRect.h = 10; // Height for collision check
+
+    for (Gold& gold : golds) {
+        SDL_Rect intersection;
+        if (SDL_IntersectRect(&ropeEndRect, &gold.rect, &intersection)) {
+            return &gold; // Return the collided gold object (now returning const Gold*)
+        }
+    }
+    return nullptr; // No collision
+}
+
+
+Stone* Rope::checkCollision(vector<Stone>& stones) { // <---- Thay đổi kiểu trả về thành const Stone*
+    if (!isExtending) return nullptr; // Only check collision when extending
+
+    SDL_Rect ropeEndRect;
+    ropeEndRect.x = rect.x - 5; // Adjust for width of rope and collision detection
+    ropeEndRect.y = rect.y + length - 5; // End of rope
+    ropeEndRect.w = 10; // Width for collision check
+    ropeEndRect.h = 10; // Height for collision check
+
+    for (Stone& stone : stones) {
+        SDL_Rect intersection;
+        if (SDL_IntersectRect(&ropeEndRect, &stone.rect, &intersection)) {
+            return &stone; // Return the collided stone object (now returning const Stone*)
+        }
+    }
+    return nullptr; // No collision
 }

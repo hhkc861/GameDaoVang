@@ -1,48 +1,72 @@
 #include "Player.h"
-#include <iostream> // for debugging
+#include "constants.h"
 
-Player::Player(SDL_Texture* tex, int x, int y, int w, int h, SDL_Texture* ropeTexture) : GameObject(tex, x, y, w, h) {
-    // Tạo Rope (dây) và gán vào con trỏ rope
-    rope = new Rope(ropeTexture, x + w / 2 - 2, y + h, 4, 0); // Đặt vị trí ban đầu của dây
-}
+Player::Player(SDL_Texture* tex, int x, int y, int w, int h) : GameObject(tex, x, y, w, h),
+speed(3),
+currentSpeed(0.0f),
+acceleration(0.15f),
+deceleration(0.2f),
+movingRight(true),
+isMoving(true) {}
 
-Player::~Player() {
-    delete rope; // Giải phóng Rope khi Player bị hủy
-}
+    void Player::update() {
+        if (isMoving) {
+            if (movingRight) {
+                currentSpeed += acceleration;
+                if (currentSpeed > speed) {
+                    currentSpeed = speed;
+                }
+            } else {
+                currentSpeed -= acceleration; // Subtract acceleration for left movement
+                if (currentSpeed < -speed) { // Check against negative speed
+                    currentSpeed = -speed;
+                }
+            }
+        } else {
+            if (currentSpeed > 0) {
+                currentSpeed -= deceleration;
+                if (currentSpeed < 0) {
+                    currentSpeed = 0;
+                }
+            } else if (currentSpeed < 0) {
+                currentSpeed += deceleration;
+                if (currentSpeed > 0) {
+                    currentSpeed = 0;
+                }
+            }
+        }
 
+        rect.x += static_cast<int>(currentSpeed);
 
-void Player::handleInput(const Uint8* keyboardState) {
-    if (keyboardState[SDL_SCANCODE_LEFT]) {
-        rect.x -= 5;
+        if (rect.x + rect.w > SCREEN_WIDTH) {
+            rect.x = SCREEN_WIDTH - rect.w;
+            movingRight = false; // Change direction to left
+            currentSpeed = 0;   // Stop at boundary briefly (optional, but might look better)
+            isMoving = true;     // Continue moving automatically
+        } else if (rect.x < 0) {
+            rect.x = 0;
+            movingRight = true;  // Change direction to right
+            currentSpeed = 0;    // Stop at boundary briefly (optional)
+            isMoving = true;      // Continue moving automatically
+        }
     }
-    if (keyboardState[SDL_SCANCODE_RIGHT]) {
-        rect.x += 5;
+
+    void Player::moveLeft() {
+        movingRight = false;
+        isMoving = true;
+        currentSpeed = 0.0f;
     }
 
-    if (keyboardState[SDL_SCANCODE_SPACE]) {
-        dropRope();
+    void Player::moveRight() {
+        movingRight = true;
+        isMoving = true;
+        currentSpeed = 0.0f;
     }
-}
 
-void Player::update() {
-    // Giữ player trong màn hình (chỉ chiều ngang)
-    if (rect.x < 0) rect.x = 0;
-    if (rect.x > 800 - rect.w) rect.x = 800 - rect.w;
-
-    // Cập nhật dây
-    rope->rect.x = rect.x + rect.w / 2 - 2; // Cập nhật vị trí x của dây theo player
-    rope->rect.y = rect.y + rect.h;         // Cập nhật vị trí y của dây theo player
-    rope->update(); // Cập nhật chiều dài của dây
-
-}
-
-void Player::render(SDL_Renderer* renderer) { // REMOVE override keyword here
-    GameObject::render(renderer); // Vẽ player
-    rope->render(renderer);         // Vẽ dây
-}
-
-void Player::dropRope() {
-    if (!rope->isExtending && !rope->isRetracting) {
-        rope->extend(); // Thả dây nếu không đang kéo dài hoặc thu lại
+    void Player::stopMoving() { // Thêm Player::
+        isMoving = false;
     }
-}
+
+    void Player::render(SDL_Renderer* renderer) const {
+    GameObject::render(renderer);
+    }

@@ -1,70 +1,70 @@
 # depslib dependency file v1.0
-1742800702 source:d:\codeblocks\gamedaovang\gameobject.cpp
+1744223658 source:d:\codeblocks\gamedaovang\gameobject.cpp
 	"GameObject.h"
+	<iostream>
 
-1742800702 d:\codeblocks\gamedaovang\gameobject.h
+1744223658 d:\codeblocks\gamedaovang\gameobject.h
 	<SDL.h>
 
-1742800702 source:d:\codeblocks\gamedaovang\gold.cpp
+1744223658 source:d:\codeblocks\gamedaovang\gold.cpp
 	"Gold.h"
-	<SDL_image.h>
+	"constants.h"
 	<cstdlib>
-	<ctime>
 	<vector>
 	<iostream>
 
-1742800702 d:\codeblocks\gamedaovang\gold.h
+1744223658 d:\codeblocks\gamedaovang\gold.h
 	"GameObject.h"
 	<SDL.h>
 	<vector>
 
-1742804560 source:d:\codeblocks\gamedaovang\main.cpp
+1744391327 source:d:\codeblocks\gamedaovang\main.cpp
 	<SDL.h>
 	<SDL_image.h>
 	<iostream>
 	<vector>
 	<ctime>
 	<algorithm>
+	<sstream>
+	<SDL_ttf.h>
+	"constants.h"
 	"GameObject.h"
 	"Rope.h"
 	"Gold.h"
 	"Stone.h"
-
-1742798601 d:\codeblocks\gamedaovang\player.h
-	"GameObject.h"
-	"Rope.h"
-
-1742803184 d:\codeblocks\gamedaovang\rope.h
-	"GameObject.h"
-	"Gold.h"
-	<SDL.h>
-
-1742798601 source:d:\codeblocks\gamedaovang\player.cpp
 	"Player.h"
-	<iostream>
 
-1742803595 source:d:\codeblocks\gamedaovang\rope.cpp
-	<SDL.h>
-	<SDL_image.h>
-	<iostream>
-	<vector>
-	<ctime>
-	<algorithm>
+1744223658 d:\codeblocks\gamedaovang\player.h
 	"GameObject.h"
-	"Rope.h"
+	<SDL.h>
+
+1744223658 d:\codeblocks\gamedaovang\rope.h
+	"GameObject.h"
 	"Gold.h"
 	"Stone.h"
+	<SDL.h>
 
-1742800702 source:d:\codeblocks\gamedaovang\stone.cpp
+1744223979 source:d:\codeblocks\gamedaovang\player.cpp
+	"Player.h"
+	"constants.h"
+
+1744223658 source:d:\codeblocks\gamedaovang\rope.cpp
+	"Rope.h"
+	<cmath>
+	<iostream>
+	"constants.h"
+
+1744223866 source:d:\codeblocks\gamedaovang\stone.cpp
 	"Stone.h"
-	<SDL_image.h>
+	"constants.h"
 	<cstdlib>
-	<ctime>
 	<vector>
 	<iostream>
 
-1742800702 d:\codeblocks\gamedaovang\stone.h
+1744223658 d:\codeblocks\gamedaovang\stone.h
 	"GameObject.h"
 	<SDL.h>
 	<vector>
+
+1743587740 d:\codeblocks\gamedaovang\constants.h
 

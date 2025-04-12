@@ -1,20 +1,24 @@
 #ifndef PLAYER_H
 #define PLAYER_H
+
 #include "GameObject.h"
-#include "Rope.h" // Thêm include cho Rope
+#include <SDL.h>
 
 class Player : public GameObject {
 public:
-    Rope* rope; // Con trỏ đến Rope
+    float speed;
+    float currentSpeed;
+    float acceleration;
+    float deceleration;
+    bool movingRight;
+    bool isMoving;
 
-    Player(SDL_Texture* tex, int x, int y, int w, int h, SDL_Texture* ropeTexture);
-    ~Player();
-
-    void handleInput(const Uint8* keyboardState);
+    Player(SDL_Texture* tex, int x, int y, int w, int h);
     void update();
-    void render(SDL_Renderer* renderer) override; // Override render để vẽ cả dây
-
-    void dropRope(); // Hàm thả dây
+    void moveLeft();
+    void moveRight();
+    void stopMoving();
+    void render(SDL_Renderer* renderer) const override;
 };
 
 #endif

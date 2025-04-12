@@ -1,54 +1,31 @@
+// Gold.cpp
 #include "Gold.h"
-#include <SDL_image.h>
+#include "constants.h" // Assuming SCREEN_WIDTH, SCREEN_HEIGHT are here
 #include <cstdlib>
-#include <ctime>
 #include <vector>
 #include <iostream>
 
-Gold::Gold(SDL_Texture* tex, int x, int y, int w, int h, int val) : GameObject(tex, x, y, w, h), value(val) {}
+using namespace std;
 
-Gold Gold::createRandomGold(SDL_Renderer* renderer, const std::vector<SDL_Rect>& existingObjectRects) {
-// ... (createRandomGold implementation - no changes needed here for const correctness) ...
-SDL_Surface* tmpSurface = IMG_Load("gold.png");
-SDL_Texture* goldTexture = SDL_CreateTextureFromSurface(renderer, tmpSurface);
-SDL_FreeSurface(tmpSurface);
+Gold::Gold(SDL_Texture* texture, int x, int y, int w, int h) : GameObject(texture, x, y, w, h), value(0) {} // Initialize GameObject part and Gold's value
 
-int width, height, x, y;
-SDL_Rect newGoldRect;
-bool overlap = false;
-int retryCount = 0;
-const int maxRetry = 100;
+Gold Gold::createRandomGold(SDL_Renderer* renderer) {
+    // Random size for gold
+    Gold gold(nullptr, 0, 0, 0, 0);
+    int size = rand() % 60 + 40; // Size between 40 and 100 (larger range for gold)
+    gold.rect = {rand() % (SCREEN_WIDTH - size - 100) + 50, rand() % (SCREEN_HEIGHT - size - 200) + 200, size, size}; // Adjusted position range
 
-do {
-overlap = false;
-width = 32 + rand() % 32;
-height = width;
+    gold.value = gold.rect.w / 2; // Example: Value is half of the width. Adjust scaling as needed.
+    if (gold.value < 10) gold.value = 10; // Minimum value if gold is very small
 
-x = rand() % (800 - width);
-y = 200 + rand() % (600 - 300 - height);
+    return gold;
+}
 
-newGoldRect = {x, y, width, height};
-
-for (const auto& existingRect : existingObjectRects) {
-    SDL_Rect intersection;
-    if (SDL_IntersectRect(&newGoldRect, &existingRect, &intersection)) {
-        overlap = true;
-        break;
+void Gold::render(SDL_Renderer* renderer) const {
+    if (texture != nullptr) {
+        GameObject::render(renderer);
+    } else {
+        SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // Yellow color if texture is missing
+        SDL_RenderFillRect(renderer, &rect);
     }
-}
-retryCount++;
-if (retryCount > maxRetry) {
-    std::cerr << "Warning: Max retries reached for gold placement, might overlap." << std::endl;
-    break;
-}
-} while (overlap);
-
-int value = 50 + rand() % 100;
-
-return Gold(goldTexture, x, y, width, height, value);
-
-}
-
-void Gold::render(SDL_Renderer* renderer) const { // <----- IMPORTANT: 'const' keyword here
-GameObject::render(renderer);
 }
