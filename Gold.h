@@ -2,8 +2,7 @@
 #define GOLD_H
 
 #include "GameObject.h"
-#include <SDL.h> // Required for SDL_Rect
-#include <vector> // Required for std::vector
+#include <SDL.h>
 
 using namespace std;
 
@@ -14,7 +13,7 @@ public:
     Gold(SDL_Texture* texture, int x, int y, int w, int h);
     static Gold createRandomGold(SDL_Renderer* renderer);
 
-    void render(SDL_Renderer* renderer) const override; // <----- IMPORTANT: 'const override' here
+    void render(SDL_Renderer* renderer) const override;
 };
 
 #endif

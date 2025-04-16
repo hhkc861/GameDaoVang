@@ -18,27 +18,16 @@
 
 using namespace std;
 
-// Định nghĩa trạng thái game
 enum GameState { MENU, PLAYING, GAME_OVER, WIN_SCREEN, LOSE_SCREEN };
 
-// *** ĐỊNH NGHĨA HÀM ĐƯỢC CHUYỂN LÊN ĐÂY, TRƯỚC main() ***
-// Hàm hỗ trợ để tải texture và xử lý lỗi
 SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filename) {
     SDL_Surface* surface = IMG_Load(filename);
-    if (!surface) {
-        cerr << "Lỗi IMG_Load: " << filename << " - " << IMG_GetError() << endl;
-        return nullptr;
-    }
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
-    if (!texture) {
-        cerr << "Lỗi SDL_CreateTextureFromSurface: " << filename << " - " << SDL_GetError() << endl;
-        return nullptr;
-    }
     return texture;
 }
 
-// Hàm để tải nhạc - Hàm mới
+// Hàm để tải nhạc
 Mix_Music *loadMusic(const char* path)
 {
     Mix_Music *gMusic = Mix_LoadMUS(path);
@@ -50,7 +39,7 @@ Mix_Music *loadMusic(const char* path)
     return gMusic;
 }
 
-// Hàm để phát nhạc - Hàm mới
+// Hàm để phát nhạc
 void playMusic(Mix_Music *gMusic)
 {
     if (gMusic == nullptr) return;
@@ -71,7 +60,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Khởi tạo SDL_mixer - Đoạn code mới
+    // Khởi tạo SDL_mixer
     if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 ) {
        cerr << "SDL_mixer không thể khởi tạo! Lỗi SDL_mixer: %s\n" << Mix_GetError() << endl;
         SDL_Quit();
@@ -86,55 +75,20 @@ int main(int argc, char* argv[]) {
 
     // Tạo cửa sổ - Không thay đổi
     SDL_Window* window = SDL_CreateWindow("Gold Miner", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-    if (window == nullptr) {
-        cerr << "SDL_CreateWindow failed: " << SDL_GetError() << endl;
-        Mix_CloseAudio(); // Dọn dẹp Mixer trước khi thoát
-        Mix_Quit();      // Dọn dẹp Mixer trước khi thoát
-        SDL_Quit();
-        return 1;
-    }
 
-    // Tạo renderer - Không thay đổi
+    // Tạo renderer
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    if (renderer == nullptr) {
-        cerr << "SDL_CreateRenderer failed: " << SDL_GetError() << endl;
-        SDL_DestroyWindow(window);
-        Mix_CloseAudio(); // Dọn dẹp Mixer trước khi thoát
-        Mix_Quit();      // Dọn dẹp Mixer trước khi thoát
-        SDL_Quit();
-        return 1;
-    }
 
-    // Khởi tạo SDL_image - Không thay đổi
+    // Khởi tạo SDL_image
     IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
 
-    //Khởi tạo SDL_ttf - Không thay đổi
+    //Khởi tạo SDL_ttf
     TTF_Init();
-    if(TTF_Init() == -1){
-        cerr << "SDL_ttf fail" << TTF_GetError() << endl;
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        Mix_CloseAudio(); // Dọn dẹp Mixer trước khi thoát
-        Mix_Quit();      // Dọn dẹp Mixer trước khi thoát
-        SDL_Quit();
-        return 1;
-    }
 
-    //Khởi tạo font - Không thay đổi
+    //Khởi tạo font
     TTF_Font* font = TTF_OpenFont("arial.ttf", 25);
-    if(font == nullptr){
-        cerr << "TTF_OpenFont fail" << TTF_GetError() << endl;
-        TTF_Quit();
-        IMG_Quit();
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        Mix_CloseAudio(); // Dọn dẹp Mixer trước khi thoát
-        Mix_Quit();      // Dọn dẹp Mixer trước khi thoát
-        SDL_Quit();
-        return 1;
-    }
 
-    // Load texture - Không thay đổi (sử dụng hàm hỗ trợ loadTexture, cũng không thay đổi)
+    // Load texture
     SDL_Texture* backgroundTexture = loadTexture(renderer, "background.jpg");
     SDL_Texture* ropeTexture = nullptr;
     {
@@ -152,62 +106,13 @@ int main(int argc, char* argv[]) {
     SDL_Texture* loseTexture = loadTexture(renderer, "lose.png");
     SDL_Texture* yesButtonTexture = loadTexture(renderer, "yes.png");
     SDL_Texture* noButtonTexture = loadTexture(renderer, "no.png");
+    Mix_Music* backgroundMusic = loadMusic("background_music.mp3");
 
-    if (!backgroundTexture || !ropeTexture || !stoneTexture || !goldTexture || !playerTexture ||
-        !menuTexture || !startButtonTexture || !winTexture || !loseTexture || !yesButtonTexture || !noButtonTexture) {
-        SDL_DestroyTexture(backgroundTexture);
-        SDL_DestroyTexture(ropeTexture);
-        SDL_DestroyTexture(stoneTexture);
-        SDL_DestroyTexture(goldTexture);
-        SDL_DestroyTexture(playerTexture);
-        SDL_DestroyTexture(menuTexture);
-        SDL_DestroyTexture(startButtonTexture);
-        SDL_DestroyTexture(winTexture);
-        SDL_DestroyTexture(loseTexture);
-        SDL_DestroyTexture(yesButtonTexture);
-        SDL_DestroyTexture(noButtonTexture);
-        TTF_CloseFont(font);
-        TTF_Quit();
-        IMG_Quit();
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        Mix_CloseAudio(); // Dọn dẹp Mixer trước khi thoát
-        Mix_Quit();      // Dọn dẹp Mixer trước khi thoát
-        SDL_Quit();
-        return 1;
-    }
-
-    // Tải nhạc nền - Đoạn code mới
-    Mix_Music* backgroundMusic = loadMusic("background_music.mp3"); // Thay "background_music.mp3" bằng file nhạc của bạn
-    if (!backgroundMusic) {
-        SDL_DestroyTexture(backgroundTexture);
-        SDL_DestroyTexture(ropeTexture);
-        SDL_DestroyTexture(stoneTexture);
-        SDL_DestroyTexture(goldTexture);
-        SDL_DestroyTexture(playerTexture);
-        SDL_DestroyTexture(menuTexture);
-        SDL_DestroyTexture(startButtonTexture);
-        SDL_DestroyTexture(winTexture);
-        SDL_DestroyTexture(loseTexture);
-        SDL_DestroyTexture(yesButtonTexture);
-        SDL_DestroyTexture(noButtonTexture);
-        TTF_CloseFont(font);
-        TTF_Quit();
-        IMG_Quit();
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        Mix_CloseAudio(); // Dọn dẹp Mixer trước khi thoát
-        Mix_Quit();      // Dọn dẹp Mixer trước khi thoát
-        SDL_Quit();
-        return 1;
-    }
-
-
-    // Tạo Player và Rope - Không thay đổi
+    // Tạo Player và Rope
     Player player(playerTexture, SCREEN_WIDTH / 2 - 48, 20, 76, 76);
     Rope rope(ropeTexture, player.rect.x + player.rect.w / 2 - 2, player.rect.y + player.rect.h, 4, 0);
 
-    // Tạo vàng và đá - Không thay đổi
+    // Tạo vàng và đá
     srand(time(0));
     vector<Gold> golds;
     vector<Stone> stones;
@@ -238,7 +143,6 @@ int main(int argc, char* argv[]) {
     for (const auto& gold : golds) {
         totalGoldValue += gold.value;
     }
-    // *** DÒNG THAY ĐỔI BÊN DƯỚI - Đã thêm static_cast<int> ***
     int targetScore = max(0, static_cast<int>((totalGoldValue * 2) / 3));
 
     player.isMoving = true;
@@ -356,8 +260,6 @@ int main(int argc, char* argv[]) {
                 } else if (grabbedStone != nullptr) {
                     stones.erase(remove_if(stones.begin(), stones.end(), [&](const Stone& stone){ return &stone == grabbedStone; }), stones.end());
                     grabbedStone = nullptr;
-                    // stones may or may not have value, if they do, add score here.
-                    // score += grabbedStone->value;
                 }
                 player.isMoving = true;
             }
@@ -373,7 +275,7 @@ int main(int argc, char* argv[]) {
         player.render(renderer);
 
         if (gameState == MENU) {
-            if (Mix_PlayingMusic() == 0) playMusic(backgroundMusic); // Phát nhạc ở trạng thái MENU - Đoạn code mới
+            if (Mix_PlayingMusic() == 0) playMusic(backgroundMusic);
             SDL_RenderCopy(renderer, menuTexture, NULL, NULL);
             SDL_RenderCopy(renderer, startButtonTexture, NULL, &startButtonRect);
         } else if (gameState == PLAYING || gameState == GAME_OVER) {
@@ -401,7 +303,6 @@ int main(int argc, char* argv[]) {
         SDL_Delay(16);
     }
 
-    // Giải phóng tài nguyên - Đã sửa đổi để bao gồm dọn dẹp nhạc
     SDL_DestroyTexture(playerTexture);
     SDL_DestroyTexture(backgroundTexture);
     SDL_DestroyTexture(ropeTexture);
@@ -413,15 +314,14 @@ int main(int argc, char* argv[]) {
     SDL_DestroyTexture(loseTexture);
     SDL_DestroyTexture(yesButtonTexture);
     SDL_DestroyTexture(noButtonTexture);
-    Mix_FreeMusic(backgroundMusic); // Giải phóng nhạc đã tải - Đoạn code mới
+    Mix_FreeMusic(backgroundMusic);
     TTF_CloseFont(font);
     TTF_Quit();
     IMG_Quit();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    Mix_CloseAudio(); // Thoát SDL_mixer trước SDL_Quit - Đoạn code mới
-    Mix_Quit();      // Thoát SDL_mixer trước SDL_Quit - Đoạn code mới
-    SDL_Quit();
+    Mix_CloseAudio();
+    Mix_Quit();
 
     return 0;
 }

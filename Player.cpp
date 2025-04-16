@@ -17,8 +17,8 @@ isMoving(true) {}
                     currentSpeed = speed;
                 }
             } else {
-                currentSpeed -= acceleration; // Subtract acceleration for left movement
-                if (currentSpeed < -speed) { // Check against negative speed
+                currentSpeed -= acceleration;
+                if (currentSpeed < -speed) {
                     currentSpeed = -speed;
                 }
             }
@@ -40,14 +40,14 @@ isMoving(true) {}
 
         if (rect.x + rect.w > SCREEN_WIDTH) {
             rect.x = SCREEN_WIDTH - rect.w;
-            movingRight = false; // Change direction to left
-            currentSpeed = 0;   // Stop at boundary briefly (optional, but might look better)
-            isMoving = true;     // Continue moving automatically
+            movingRight = false;
+            currentSpeed = 0;
+            isMoving = true;
         } else if (rect.x < 0) {
             rect.x = 0;
-            movingRight = true;  // Change direction to right
-            currentSpeed = 0;    // Stop at boundary briefly (optional)
-            isMoving = true;      // Continue moving automatically
+            movingRight = true;
+            currentSpeed = 0;
+            isMoving = true;
         }
     }
 
@@ -63,7 +63,7 @@ isMoving(true) {}
         currentSpeed = 0.0f;
     }
 
-    void Player::stopMoving() { // Thêm Player::
+    void Player::stopMoving() {
         isMoving = false;
     }
 
