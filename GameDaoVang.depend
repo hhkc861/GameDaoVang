@@ -6,7 +6,7 @@
 1744223658 d:\codeblocks\gamedaovang\gameobject.h
 	<SDL.h>
 
-1744223658 source:d:\codeblocks\gamedaovang\gold.cpp
+1744471780 source:d:\codeblocks\gamedaovang\gold.cpp
 	"Gold.h"
 	"constants.h"
 	<cstdlib>
@@ -18,7 +18,7 @@
 	<SDL.h>
 	<vector>
 
-1744391327 source:d:\codeblocks\gamedaovang\main.cpp
+1744471780 source:d:\codeblocks\gamedaovang\main.cpp
 	<SDL.h>
 	<SDL_image.h>
 	<iostream>
