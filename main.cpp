@@ -18,7 +18,7 @@
 
 using namespace std;
 
-enum GameState { MENU, PLAYING, GAME_OVER, WIN_SCREEN, LOSE_SCREEN };
+enum GameState { MENU, PLAYING, GAME_OVER, WIN_SCREEN, LOSE_SCREEN, INSTRUCTIONS };
 
 SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filename) {
     SDL_Surface* surface = IMG_Load(filename);
@@ -100,6 +100,8 @@ int main(int argc, char* argv[]) {
     SDL_Texture* loseTexture = loadTexture(renderer, "lose.png");
     SDL_Texture* yesButtonTexture = loadTexture(renderer, "yes.png");
     SDL_Texture* noButtonTexture = loadTexture(renderer, "no.png");
+    SDL_Texture* instructionsButtonTexture = loadTexture(renderer, "instructions.png");
+    SDL_Texture* introTexture = loadTexture(renderer, "intro.jpg");
     Mix_Music* backgroundMusic = loadMusic("background_music.mp3");
 
     // Tạo Player và Rope
@@ -143,6 +145,7 @@ int main(int argc, char* argv[]) {
     GameState gameState = MENU;  //trạng thái game ban đầu là menu
 
     SDL_Rect startButtonRect = {14, 85, 300, 250};
+    SDL_Rect instructionsButtonRect = {14, 350, 300, 100};
     SDL_Rect yesButtonRect = {SCREEN_WIDTH / 2 - 120, SCREEN_HEIGHT / 2 + 80, 100, 50};
     SDL_Rect noButtonRect = {SCREEN_WIDTH / 2 + 20, SCREEN_HEIGHT / 2 + 80, 100, 50};
 
@@ -179,6 +182,9 @@ int main(int argc, char* argv[]) {
                                 totalGoldValue += gold.value;
                             }
                             targetScore = max(0, static_cast<int>((totalGoldValue * 2) / 3));
+                    } else if (mouseX >= instructionsButtonRect.x && mouseX < instructionsButtonRect.x + instructionsButtonRect.w &&
+                               mouseY >= instructionsButtonRect.y && mouseY < instructionsButtonRect.y + instructionsButtonRect.h) {
+                        gameState = INSTRUCTIONS; // Switch to INSTRUCTIONS state
                     }
                 } else if (gameState == PLAYING) {
                     if (!rope.isExtending && !rope.isRetracting) { //dây thừng k mở rộng & thu lại
@@ -212,6 +218,15 @@ int main(int argc, char* argv[]) {
                     } else if (mouseX >= noButtonRect.x && mouseX < noButtonRect.x + noButtonRect.w &&
                                mouseY >= noButtonRect.y && mouseY < noButtonRect.y + noButtonRect.h) {
                         quit = true;
+                    }
+                } else if (gameState == INSTRUCTIONS) {
+                    // No mouse click handling in INSTRUCTIONS state for now
+                }
+            }
+            if (e.type == SDL_KEYDOWN) { // Handle key presses
+                if (gameState == INSTRUCTIONS) {
+                    if (e.key.keysym.sym == SDLK_RETURN) { // If Enter key is pressed
+                        gameState = MENU; // Return to MENU state
                     }
                 }
             }
@@ -272,6 +287,7 @@ int main(int argc, char* argv[]) {
             if (Mix_PlayingMusic() == 0) playMusic(backgroundMusic); //phát nhạc
             SDL_RenderCopy(renderer, menuTexture, NULL, NULL); //vẽ backgroung
             SDL_RenderCopy(renderer, startButtonTexture, NULL, &startButtonRect); //vẽ nút start
+            SDL_RenderCopy(renderer, instructionsButtonTexture, NULL, &instructionsButtonRect); // Render instructions button
         } else if (gameState == PLAYING || gameState == GAME_OVER) {
             if (font) {
                 SDL_Color textColor = {0, 255, 0}; //màu xanh
@@ -304,6 +320,8 @@ int main(int argc, char* argv[]) {
             SDL_RenderCopy(renderer, loseTexture, NULL, NULL);
             SDL_RenderCopy(renderer, yesButtonTexture, NULL, &yesButtonRect);
             SDL_RenderCopy(renderer, noButtonTexture, NULL, &noButtonRect);
+        } else if (gameState == INSTRUCTIONS) {
+            SDL_RenderCopy(renderer, introTexture, NULL, NULL); // Render intro image
         }
 
         SDL_RenderPresent(renderer);
@@ -321,6 +339,8 @@ int main(int argc, char* argv[]) {
     SDL_DestroyTexture(loseTexture);
     SDL_DestroyTexture(yesButtonTexture);
     SDL_DestroyTexture(noButtonTexture);
+    SDL_DestroyTexture(instructionsButtonTexture);
+    SDL_DestroyTexture(introTexture);
     Mix_FreeMusic(backgroundMusic);
     TTF_CloseFont(font);
     TTF_Quit();
