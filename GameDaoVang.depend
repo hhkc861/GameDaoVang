@@ -1,70 +1,70 @@
 # depslib dependency file v1.0
-1744223658 source:d:\codeblocks\gamedaovang\gameobject.cpp
+1744827041 source:d:\codeblocks\gamedaovang\gameobject.cpp
 	"GameObject.h"
 	<iostream>
 
 1744223658 d:\codeblocks\gamedaovang\gameobject.h
 	<SDL.h>
 
-1744471780 source:d:\codeblocks\gamedaovang\gold.cpp
+1744827041 source:d:\codeblocks\gamedaovang\gold.cpp
 	"Gold.h"
 	"constants.h"
 	<cstdlib>
 	<vector>
 	<iostream>
 
-1744223658 d:\codeblocks\gamedaovang\gold.h
+1744768824 d:\codeblocks\gamedaovang\gold.h
 	"GameObject.h"
 	<SDL.h>
-	<vector>
 
-1744471780 source:d:\codeblocks\gamedaovang\main.cpp
+1744827127 source:d:\codeblocks\gamedaovang\main.cpp
+	"GameObject.h"
+	"Gold.h"
+	"constants.h"
+	"Stone.h"
+	"Player.h"
+	"Rope.h"
 	<SDL.h>
 	<SDL_image.h>
+	<SDL_ttf.h>
+	<SDL_mixer.h>
 	<iostream>
 	<vector>
 	<ctime>
 	<algorithm>
 	<sstream>
-	<SDL_ttf.h>
-	"constants.h"
-	"GameObject.h"
-	"Rope.h"
-	"Gold.h"
-	"Stone.h"
-	"Player.h"
 
 1744223658 d:\codeblocks\gamedaovang\player.h
 	"GameObject.h"
 	<SDL.h>
 
-1744223658 d:\codeblocks\gamedaovang\rope.h
+1744768824 d:\codeblocks\gamedaovang\rope.h
 	"GameObject.h"
 	"Gold.h"
 	"Stone.h"
 	<SDL.h>
 
-1744223979 source:d:\codeblocks\gamedaovang\player.cpp
+1744848944 source:d:\codeblocks\gamedaovang\player.cpp
 	"Player.h"
 	"constants.h"
 
-1744223658 source:d:\codeblocks\gamedaovang\rope.cpp
+1744768824 source:d:\codeblocks\gamedaovang\rope.cpp
 	"Rope.h"
 	<cmath>
 	<iostream>
 	"constants.h"
 
-1744223866 source:d:\codeblocks\gamedaovang\stone.cpp
+1744768824 source:d:\codeblocks\gamedaovang\stone.cpp
 	"Stone.h"
 	"constants.h"
 	<cstdlib>
 	<vector>
 	<iostream>
 
-1744223658 d:\codeblocks\gamedaovang\stone.h
+1744768824 d:\codeblocks\gamedaovang\stone.h
 	"GameObject.h"
 	<SDL.h>
 	<vector>
 
-1743587740 d:\codeblocks\gamedaovang\constants.h
+1744768824 d:\codeblocks\gamedaovang\constants.h
 

@@ -31,11 +31,6 @@ SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filename) {
 Mix_Music *loadMusic(const char* path)
 {
     Mix_Music *gMusic = Mix_LoadMUS(path);
-    if (gMusic == nullptr) {
-        SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION,
-                       SDL_LOG_PRIORITY_ERROR,
-            "Không thể tải nhạc! Lỗi SDL_mixer: %s", Mix_GetError());
-    }
     return gMusic;
 }
 
@@ -52,9 +47,8 @@ void playMusic(Mix_Music *gMusic)
     }
 }
 
-
 int main(int argc, char* argv[]) {
-    // Khởi tạo SDL - Đã sửa đổi để bao gồm SDL_INIT_AUDIO
+    // Khởi tạo SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
         cerr << "SDL fail" << SDL_GetError() << endl;
         return 1;
@@ -73,7 +67,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Tạo cửa sổ - Không thay đổi
+    // Tạo cửa sổ
     SDL_Window* window = SDL_CreateWindow("Gold Miner", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 
     // Tạo renderer
@@ -92,9 +86,9 @@ int main(int argc, char* argv[]) {
     SDL_Texture* backgroundTexture = loadTexture(renderer, "background.jpg");
     SDL_Texture* ropeTexture = nullptr;
     {
-        SDL_Surface* tmpSurfaceRope = SDL_CreateRGBSurface(0, 4, 4, 32, 0, 0, 0, 0);
-        SDL_FillRect(tmpSurfaceRope, NULL, SDL_MapRGB(tmpSurfaceRope->format, 255, 255, 255));
-        ropeTexture = SDL_CreateTextureFromSurface(renderer, tmpSurfaceRope);
+        SDL_Surface* tmpSurfaceRope = SDL_CreateRGBSurface(0, 4, 4, 32, 0, 0, 0, 0); //tao surface tam thoi cho day thung
+        SDL_FillRect(tmpSurfaceRope, NULL, SDL_MapRGB(tmpSurfaceRope->format, 255, 255, 255)); //mau trang cho day
+        ropeTexture = SDL_CreateTextureFromSurface(renderer, tmpSurfaceRope); //tao texture tu surface
         SDL_FreeSurface(tmpSurfaceRope);
     }
     SDL_Texture* stoneTexture = loadTexture(renderer, "Stone.png");
@@ -113,14 +107,14 @@ int main(int argc, char* argv[]) {
     Rope rope(ropeTexture, player.rect.x + player.rect.w / 2 - 2, player.rect.y + player.rect.h, 4, 0);
 
     // Tạo vàng và đá
-    srand(time(0));
+    srand(time(0)); //khoi tao seed cho random
     vector<Gold> golds;
     vector<Stone> stones;
 
     for (int i = 0; i < 10; ++i) {
-        Gold newGold = Gold::createRandomGold(renderer);
-        newGold.texture = goldTexture;
-        golds.push_back(newGold);
+        Gold newGold = Gold::createRandomGold(renderer); //tạo ngẫu nhiên
+        newGold.texture = goldTexture; //gán texture
+        golds.push_back(newGold); //thêm vào vector golds
     }
     for (int i = 0; i < 5; ++i) {
         Stone newStone = Stone::createRandomStone(renderer);
@@ -131,63 +125,63 @@ int main(int argc, char* argv[]) {
     int score = 0;
     bool quit = false;
     SDL_Event e;
-    Gold* grabbedGold = nullptr;
+    Gold* grabbedGold = nullptr;  //con trỏ đến cục vàng bị gắp
     Stone* grabbedStone = nullptr;
-    Uint32 gameStartTime = SDL_GetTicks();
-    int gameDurationSeconds = 30;
-    int remainingSeconds;
+    Uint32 gameStartTime = SDL_GetTicks();  //thời điểm bắt đầu game
+    int gameDurationSeconds = 30; //thời gian chơi
+    int remainingSeconds; //thời gian còn lại
     bool gameOver = false;
-    string gameResultText;
+    string gameResultText; //kết quả game
 
-    int totalGoldValue = 0;
+    int totalGoldValue = 0; //giá trị tổng
     for (const auto& gold : golds) {
         totalGoldValue += gold.value;
     }
     int targetScore = max(0, static_cast<int>((totalGoldValue * 2) / 3));
 
-    player.isMoving = true;
-    GameState gameState = MENU;
+    player.isMoving = true;  // player di chuyển
+    GameState gameState = MENU;  //trạng thái game ban đầu là menu
 
     SDL_Rect startButtonRect = {14, 85, 300, 250};
     SDL_Rect yesButtonRect = {SCREEN_WIDTH / 2 - 120, SCREEN_HEIGHT / 2 + 80, 100, 50};
     SDL_Rect noButtonRect = {SCREEN_WIDTH / 2 + 20, SCREEN_HEIGHT / 2 + 80, 100, 50};
 
     while (!quit) {
-        while (SDL_PollEvent(&e) != 0) {
-            if (e.type == SDL_QUIT) {
+        while (SDL_PollEvent(&e) != 0) { //xử lí sự kiện
+            if (e.type == SDL_QUIT) { //khi đóng cửa sổ
                 quit = true;
             }
-            if (e.type == SDL_MOUSEBUTTONDOWN) {
+            if (e.type == SDL_MOUSEBUTTONDOWN) { //khi nhấn chuột
                 int mouseX, mouseY;
                 SDL_GetMouseState(&mouseX, &mouseY);
 
                 if (gameState == MENU) {
                     if (mouseX >= startButtonRect.x && mouseX < startButtonRect.x + startButtonRect.w &&
                         mouseY >= startButtonRect.y && mouseY < startButtonRect.y + startButtonRect.h) {
-                        gameState = PLAYING;
-                        gameStartTime = SDL_GetTicks();
-                        score = 0;
-                        gameOver = false;
-                        golds.clear();
-                        stones.clear();
-                        for (int i = 0; i < 10; ++i) {
-                            Gold newGold = Gold::createRandomGold(renderer);
-                            newGold.texture = goldTexture;
-                            golds.push_back(newGold);
-                        }
-                        for (int i = 0; i < 5; ++i) {
-                            Stone newStone = Stone::createRandomStone(renderer);
-                            newStone.texture = stoneTexture;
-                            stones.push_back(newStone);
-                        }
-                        totalGoldValue = 0;
-                        for (const auto& gold : golds) {
-                            totalGoldValue += gold.value;
-                        }
-                        targetScore = max(0, static_cast<int>((totalGoldValue * 2) / 3));
+                            gameState = PLAYING;
+                            gameStartTime = SDL_GetTicks(); //reset tgian bđầu gamme
+                            score = 0;
+                            gameOver = false;
+                            golds.clear();
+                            stones.clear();
+                            for (int i = 0; i < 10; ++i) {
+                                Gold newGold = Gold::createRandomGold(renderer);
+                                newGold.texture = goldTexture;
+                                golds.push_back(newGold);
+                            }
+                            for (int i = 0; i < 5; ++i) {
+                                Stone newStone = Stone::createRandomStone(renderer);
+                                newStone.texture = stoneTexture;
+                                stones.push_back(newStone);
+                            }
+                            totalGoldValue = 0;
+                            for (const auto& gold : golds) {
+                                totalGoldValue += gold.value;
+                            }
+                            targetScore = max(0, static_cast<int>((totalGoldValue * 2) / 3));
                     }
                 } else if (gameState == PLAYING) {
-                    if (!rope.isExtending && !rope.isRetracting) {
+                    if (!rope.isExtending && !rope.isRetracting) { //dây thừng k mở rộng & thu lại
                         player.stopMoving();
                         rope.extend();
                     }
@@ -234,30 +228,30 @@ int main(int argc, char* argv[]) {
             }
 
             player.update();
-            rope.rect.x = player.rect.x + player.rect.w / 2 - 2;
+            rope.rect.x = player.rect.x + player.rect.w / 2 - 2; //update vị trí dây thừng
             rope.update();
 
             if (rope.isExtending) {
-                if (grabbedGold == nullptr) {
+                if (grabbedGold == nullptr && grabbedStone == nullptr) {
                     grabbedGold = rope.checkCollision(golds);
+                    grabbedStone = rope.checkCollision(stones);
                     if (grabbedGold != nullptr) {
-                        rope.attachedGold = grabbedGold;
+                        rope.attachedGold = grabbedGold; //gắn vàng vào dây
                         rope.retract();
                     }
-                }
-                if (grabbedStone == nullptr && grabbedGold == nullptr) {
-                    grabbedStone = rope.checkCollision(stones);
                     if (grabbedStone != nullptr) {
                         rope.attachedStone = grabbedStone;
                         rope.retract();
                     }
                 }
-            } else if (!rope.isRetracting) {
+            } //xoá vàng và đá khi dây = 0
+            else if (!rope.isRetracting) {
                 if (grabbedGold != nullptr) {
                     score += grabbedGold->value;
                     golds.erase(remove_if(golds.begin(), golds.end(), [&](const Gold& gold){ return &gold == grabbedGold; }), golds.end());
                     grabbedGold = nullptr;
                 } else if (grabbedStone != nullptr) {
+                    score += grabbedStone->value;
                     stones.erase(remove_if(stones.begin(), stones.end(), [&](const Stone& stone){ return &stone == grabbedStone; }), stones.end());
                     grabbedStone = nullptr;
                 }
@@ -265,9 +259,9 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+        SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF); // Thiết lập màu vẽ renderer thành đen
         SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
+        SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL); //để đảm bảo background đc vẽ đầu tiên
 
         for (const auto& gold : golds) gold.render(renderer);
         for (const auto& stone : stones) stone.render(renderer);
@@ -275,19 +269,32 @@ int main(int argc, char* argv[]) {
         player.render(renderer);
 
         if (gameState == MENU) {
-            if (Mix_PlayingMusic() == 0) playMusic(backgroundMusic);
-            SDL_RenderCopy(renderer, menuTexture, NULL, NULL);
-            SDL_RenderCopy(renderer, startButtonTexture, NULL, &startButtonRect);
+            if (Mix_PlayingMusic() == 0) playMusic(backgroundMusic); //phát nhạc
+            SDL_RenderCopy(renderer, menuTexture, NULL, NULL); //vẽ backgroung
+            SDL_RenderCopy(renderer, startButtonTexture, NULL, &startButtonRect); //vẽ nút start
         } else if (gameState == PLAYING || gameState == GAME_OVER) {
             if (font) {
-                SDL_Color textColor = {0, 255, 0};
-                SDL_Surface* scoreSurface = TTF_RenderText_Solid(font, ("$" + to_string(score)).c_str(), textColor);
+                SDL_Color textColor = {0, 255, 0}; //màu xanh
+                SDL_Surface* scoreSurface = TTF_RenderText_Solid(font, ("$" + to_string(score)).c_str(), textColor); //render điểm thành surface
                 SDL_Surface* timerSurface = TTF_RenderText_Solid(font, to_string(remainingSeconds).c_str(), textColor);
                 SDL_Surface* targetSurface = TTF_RenderText_Solid(font, ("$" + to_string(targetScore)).c_str(), textColor);
 
-                if (scoreSurface) { SDL_Texture* scoreTexture = SDL_CreateTextureFromSurface(renderer, scoreSurface); SDL_Rect scoreRect = {85, 13, scoreSurface->w, scoreSurface->h}; SDL_RenderCopy(renderer, scoreTexture, nullptr, &scoreRect); SDL_DestroyTexture(scoreTexture); SDL_FreeSurface(scoreSurface); }
-                if (timerSurface) { SDL_Texture* timerTexture = SDL_CreateTextureFromSurface(renderer, timerSurface); SDL_Rect timerRect = {SCREEN_WIDTH - timerSurface->w - 10, 10, timerSurface->w, timerSurface->h}; SDL_RenderCopy(renderer, timerTexture, nullptr, &timerRect); SDL_DestroyTexture(timerTexture); SDL_FreeSurface(timerSurface); }
-                if (targetSurface) { SDL_Texture* targetTexture = SDL_CreateTextureFromSurface(renderer, targetSurface); SDL_Rect targetRect = {85, 50, targetSurface->w, targetSurface->h}; SDL_RenderCopy(renderer, targetTexture, nullptr, &targetRect); SDL_DestroyTexture(targetTexture); SDL_FreeSurface(targetSurface); }
+                //khi render thành công
+                if (scoreSurface) {
+                    SDL_Texture* scoreTexture = SDL_CreateTextureFromSurface(renderer, scoreSurface); //tạo texture
+                    SDL_Rect scoreRect = {85, 13, scoreSurface->w, scoreSurface->h};  //vị trí
+                    SDL_RenderCopy(renderer, scoreTexture, nullptr, &scoreRect); SDL_DestroyTexture(scoreTexture); //texture điểm số & giải phóng
+                    SDL_FreeSurface(scoreSurface); } //giải phóng surface
+                if (timerSurface) {
+                    SDL_Texture* timerTexture = SDL_CreateTextureFromSurface(renderer, timerSurface);
+                    SDL_Rect timerRect = {SCREEN_WIDTH - timerSurface->w - 10, 10, timerSurface->w, timerSurface->h};
+                    SDL_RenderCopy(renderer, timerTexture, nullptr, &timerRect); SDL_DestroyTexture(timerTexture);
+                    SDL_FreeSurface(timerSurface); }
+                if (targetSurface) {
+                    SDL_Texture* targetTexture = SDL_CreateTextureFromSurface(renderer, targetSurface);
+                    SDL_Rect targetRect = {85, 50, targetSurface->w, targetSurface->h};
+                    SDL_RenderCopy(renderer, targetTexture, nullptr, &targetRect);
+                    SDL_DestroyTexture(targetTexture); SDL_FreeSurface(targetSurface); }
             }
         } else if (gameState == WIN_SCREEN) {
             SDL_RenderCopy(renderer, winTexture, NULL, NULL);

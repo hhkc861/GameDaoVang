@@ -25,7 +25,7 @@ void Gold::render(SDL_Renderer* renderer) const {
     if (texture != nullptr) {
         GameObject::render(renderer);
     } else {
-        SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); //màu vàng
         SDL_RenderFillRect(renderer, &rect);
     }
 }

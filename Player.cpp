@@ -2,17 +2,17 @@
 #include "constants.h"
 
 Player::Player(SDL_Texture* tex, int x, int y, int w, int h) : GameObject(tex, x, y, w, h),
-speed(3),
-currentSpeed(0.0f),
-acceleration(0.15f),
-deceleration(0.2f),
+speed(3), //tốc độ tối đa
+currentSpeed(0.0f),  //tốc độ hiện tại đứng yên
+acceleration(0.15f),  //gia tốc 0.15f
+deceleration(0.2f),  //giảm tốc
 movingRight(true),
 isMoving(true) {}
 
     void Player::update() {
         if (isMoving) {
             if (movingRight) {
-                currentSpeed += acceleration;
+                currentSpeed += acceleration;  //tăng tốc theo gia tốc
                 if (currentSpeed > speed) {
                     currentSpeed = speed;
                 }
@@ -36,14 +36,14 @@ isMoving(true) {}
             }
         }
 
-        rect.x += static_cast<int>(currentSpeed);
+        rect.x += static_cast<int>(currentSpeed); //update vị trí x của người chơi trên tốc độ hiện tại
 
-        if (rect.x + rect.w > SCREEN_WIDTH) {
+        if (rect.x + rect.w > SCREEN_WIDTH) { //nếu vượt quá chiều rộng màn hình cạnh phải
             rect.x = SCREEN_WIDTH - rect.w;
             movingRight = false;
             currentSpeed = 0;
             isMoving = true;
-        } else if (rect.x < 0) {
+        } else if (rect.x < 0) { //cạnh trái
             rect.x = 0;
             movingRight = true;
             currentSpeed = 0;

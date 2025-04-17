@@ -2,7 +2,17 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug" />
-	<File name="Gold.h" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="-4" zoom_2="0">
+	<File name="Stone.cpp" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="0" topLine="5" />
+		</Cursor>
+	</File>
+	<File name="constants.h" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="0" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="Player.h" open="1" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="0" topLine="0" />
 		</Cursor>
@@ -12,12 +22,27 @@
 			<Cursor1 position="0" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="Rope.h" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="-4" zoom_2="0">
+	<File name="Rope.cpp" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="-3" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="0" topLine="0" />
+			<Cursor1 position="0" topLine="33" />
 		</Cursor>
 	</File>
-	<File name="GameObject.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
+	<File name="Gold.cpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="-4" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="935" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="Rope.h" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="-4" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="0" topLine="10" />
+		</Cursor>
+	</File>
+	<File name="main.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="-4" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="10856" topLine="241" />
+		</Cursor>
+	</File>
+	<File name="Stone.h" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="-4" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="0" topLine="0" />
 		</Cursor>
@@ -27,39 +52,14 @@
 			<Cursor1 position="0" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="main.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="-4" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="17387" topLine="372" />
-		</Cursor>
-	</File>
-	<File name="Stone.h" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="-4" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="98" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="Stone.cpp" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="-5" zoom_2="0">
+	<File name="Gold.h" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="-4" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="0" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="Gold.cpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="-4" zoom_2="0">
+	<File name="GameObject.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="701" topLine="4" />
-		</Cursor>
-	</File>
-	<File name="constants.h" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="0" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="Player.h" open="1" top="1" tabpos="11" split="0" active="1" splitpos="0" zoom_1="-2" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="0" topLine="1" />
-		</Cursor>
-	</File>
-	<File name="Rope.cpp" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="-5" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="0" topLine="77" />
+			<Cursor1 position="311" topLine="0" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>
