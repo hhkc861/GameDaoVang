@@ -18,7 +18,7 @@
 	<SDL.h>
 	<vector>
 
-1746434169 source:d:\codeblocks\gamedaovang\main.cpp
+1746439963 source:d:\codeblocks\gamedaovang\main.cpp
 	"GameObject.h"
 	"Gold.h"
 	"Stone.h"
@@ -42,7 +42,7 @@
 	"GameObject.h"
 	<SDL.h>
 
-1746433719 d:\codeblocks\gamedaovang\rope.h
+1746440194 d:\codeblocks\gamedaovang\rope.h
 	"GameObject.h"
 	"Gold.h"
 	"Stone.h"
@@ -53,7 +53,7 @@
 	"Player.h"
 	"constants.h"
 
-1746433862 source:d:\codeblocks\gamedaovang\rope.cpp
+1746435809 source:d:\codeblocks\gamedaovang\rope.cpp
 	"Rope.h"
 	"constants.h"
 	<cmath>

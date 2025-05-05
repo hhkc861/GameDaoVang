@@ -1,33 +1,32 @@
-#include "GameObject.h" // Base class definitions
-#include "Gold.h"       // Gold object definition
-#include "Stone.h"      // Stone object definition
-#include "Player.h"     // Player object definition (now stationary)
-#include "Rope.h"       // Rope object definition (now handles swinging)
-#include "constants.h"  // Screen dimensions
+#include "GameObject.h"
+#include "Gold.h"
+#include "Stone.h"
+#include "Player.h"
+#include "Rope.h"
+#include "constants.h"
 
-#define SDL_MAIN_HANDLED // Define this before including SDL.h to handle main() redirection
+#define SDL_MAIN_HANDLED
 #include <SDL.h>
-#include <SDL_image.h> // For loading images (PNG, JPG)
-#include <SDL_ttf.h>   // For rendering text
-#include <SDL_mixer.h> // For playing audio
+#include <SDL_image.h>
+#include <SDL_ttf.h>
+#include <SDL_mixer.h>
 
-#include <iostream>    // For standard I/O (like cerr)
-#include <vector>      // For using std::vector to hold game objects
-#include <string>      // For using std::string
-#include <sstream>     // For converting numbers to strings (std::to_string alternative)
-#include <ctime>       // For seeding random number generator (srand, time)
-#include <cstdlib>     // For random number generation (rand)
-#include <algorithm>   // For std::max, std::remove_if
-#include <cmath>       // For std::max used in target score
+#include <iostream>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <ctime>
+#include <cstdlib>
+#include <algorithm>
+#include <cmath>
 
-// Use std namespace locally within this file
 using namespace std;
 
-// Define game states
+const int ROPE_THICKNESS = 4;
+
 enum GameState {
     MENU,
     PLAYING,
-    // GAME_OVER, // This state might be merged into WIN/LOSE
     WIN_SCREEN,
     LOSE_SCREEN,
     INSTRUCTIONS
@@ -142,6 +141,37 @@ int main(int argc, char* argv[]) {
         // Continue without text? Or quit? Decide based on importance.
     }
 
+        SDL_Texture* ropeSegmentTexture = nullptr;
+    { // Use a scope block for temporary surface
+        SDL_Surface* surf = SDL_CreateRGBSurface(0, ROPE_THICKNESS, 1, 32, 0, 0, 0, 0); // Width = thickness, Height = 1
+        if (!surf) {
+             cerr << "Failed to create rope surface! SDL Error: " << SDL_GetError() << endl;
+             // Handle major error: cleanup and exit
+             if(font) TTF_CloseFont(font);
+             SDL_DestroyRenderer(renderer);
+             SDL_DestroyWindow(window);
+             Mix_CloseAudio(); Mix_Quit(); TTF_Quit(); IMG_Quit(); SDL_Quit();
+             return 1;
+        } else {
+            SDL_FillRect(surf, NULL, SDL_MapRGB(surf->format, 255, 255, 255)); // Fill white (color doesn't matter much if modulated)
+            ropeSegmentTexture = SDL_CreateTextureFromSurface(renderer, surf);
+            if (!ropeSegmentTexture) {
+                 cerr << "Failed to create rope texture! SDL Error: " << SDL_GetError() << endl;
+                 // Handle major error: cleanup and exit
+                 SDL_FreeSurface(surf);
+                 if(font) TTF_CloseFont(font);
+                 SDL_DestroyRenderer(renderer);
+                 SDL_DestroyWindow(window);
+                 Mix_CloseAudio(); Mix_Quit(); TTF_Quit(); IMG_Quit(); SDL_Quit();
+                 return 1;
+            }
+            SDL_FreeSurface(surf); // Free the temporary surface
+        }
+    }
+    // Optional: Set blend mode and color modulation for the rope texture
+    SDL_SetTextureBlendMode(ropeSegmentTexture, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureColorMod(ropeSegmentTexture, 139, 69, 19);
+
     // --- Load Assets ---
     SDL_Texture* backgroundTexture = loadTexture(renderer, "background.jpg"); // Assuming assets are in an 'assets' folder
     SDL_Texture* stoneTexture = loadTexture(renderer, "Stone.png");
@@ -157,6 +187,18 @@ int main(int argc, char* argv[]) {
     SDL_Texture* introTexture = loadTexture(renderer, "intro.jpg");
     Mix_Music* backgroundMusic = loadMusic("background_music.mp3"); // Load background music
 
+    if (!backgroundTexture || !stoneTexture || !goldTexture || !playerTexture || !menuTexture || !startButtonTexture) {
+        cerr << "FATAL: Failed to load one or more essential textures. Exiting." << endl;
+        // Perform cleanup before exiting
+        SDL_DestroyTexture(ropeSegmentTexture); // Don't forget the rope segment texture
+        // ... destroy other loaded textures ...
+        if(font) TTF_CloseFont(font);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        Mix_CloseAudio(); Mix_Quit(); TTF_Quit(); IMG_Quit(); SDL_Quit();
+        return 1;
+    }
+
     // --- Game Object Creation ---
     // Create Player (centered horizontally, near top)
     int playerWidth = 76;
@@ -167,7 +209,7 @@ int main(int argc, char* argv[]) {
     int ropeStartX = player.rect.x + player.rect.w / 2;
     int ropeStartY = player.rect.y + player.rect.h;
     int ropeMaxLength = SCREEN_HEIGHT - ropeStartY - 10; // Max length stops just above screen bottom
-    Rope rope(ropeStartX, ropeStartY, ropeMaxLength);   // Create the initial rope
+    Rope rope(ropeSegmentTexture, ROPE_THICKNESS, ropeStartX, ropeStartY, ropeMaxLength);
 
     // Containers for gold and stones
     vector<Gold> golds;
@@ -180,7 +222,7 @@ int main(int argc, char* argv[]) {
     bool quit = false;
     SDL_Event e;
     Uint32 gameStartTime = 0; // Will be set when game starts
-    int gameDurationSeconds = 60; // Duration of a game round
+    int gameDurationSeconds = 30; // Duration of a game round
     int remainingSeconds = gameDurationSeconds;
     bool gameOver = false; // Flag if timer ran out
     GameState gameState = MENU; // Start at the main menu
@@ -189,10 +231,10 @@ int main(int argc, char* argv[]) {
     srand(time(0));
 
     // --- UI Element Positions ---
-    SDL_Rect startButtonRect = {SCREEN_WIDTH / 2 - 150, 200, 300, 100}; // Centered buttons
-    SDL_Rect instructionsButtonRect = {SCREEN_WIDTH / 2 - 150, 320, 300, 100};
-    SDL_Rect yesButtonRect = {SCREEN_WIDTH / 2 - 120 - 10, SCREEN_HEIGHT / 2 + 80, 100, 50}; // Yes/No slightly spaced
-    SDL_Rect noButtonRect = {SCREEN_WIDTH / 2 + 20 + 10, SCREEN_HEIGHT / 2 + 80, 100, 50};
+    SDL_Rect startButtonRect = {20, 100, 300, 250}; // Centered buttons x,y,w,h
+    SDL_Rect instructionsButtonRect = {20, 320, 230, 100};
+    SDL_Rect yesButtonRect = {70, SCREEN_HEIGHT / 2 + 50, 200, 70}; // Yes/No slightly spaced
+    SDL_Rect noButtonRect = {500, SCREEN_HEIGHT / 2 + 50, 200, 70};
 
     // Lambda function to reset the game state for a new round
     auto resetGame = [&]() {
@@ -204,8 +246,7 @@ int main(int argc, char* argv[]) {
         remainingSeconds = gameDurationSeconds;
 
         // Recreate the rope to reset its state (angle, length, attached objects)
-        rope = Rope(ropeStartX, ropeStartY, ropeMaxLength);
-
+        rope = Rope(ropeSegmentTexture, ROPE_THICKNESS, ropeStartX, ropeStartY, ropeMaxLength);
         // Create new gold and stones
         totalGoldValue = 0;
         for (int i = 0; i < 10; ++i) { // Number of gold nuggets
@@ -355,8 +396,8 @@ int main(int argc, char* argv[]) {
                 if (font) {
                     SDL_Color textColor = {255, 255, 255, 255}; // White text
                     string scoreText = "$" + to_string(score);
-                    string timeText = "Time: " + to_string(remainingSeconds);
-                    string targetText = "Target: $" + to_string(targetScore);
+                    string timeText = to_string(remainingSeconds);
+                    string targetText = " $" + to_string(targetScore);
 
                     SDL_Surface* scoreSurface = TTF_RenderText_Blended(font, scoreText.c_str(), textColor); // Use Blended for better quality
                     SDL_Surface* timerSurface = TTF_RenderText_Blended(font, timeText.c_str(), textColor);
@@ -364,7 +405,7 @@ int main(int argc, char* argv[]) {
 
                     if (scoreSurface) {
                         SDL_Texture* scoreTexture = SDL_CreateTextureFromSurface(renderer, scoreSurface);
-                        SDL_Rect scoreRect = {20, 10, scoreSurface->w, scoreSurface->h}; // Top-left area
+                        SDL_Rect scoreRect = {85, 12, scoreSurface->w, scoreSurface->h}; // Top-left area
                         SDL_RenderCopy(renderer, scoreTexture, nullptr, &scoreRect);
                         SDL_DestroyTexture(scoreTexture); SDL_FreeSurface(scoreSurface);
                     }
@@ -378,7 +419,7 @@ int main(int argc, char* argv[]) {
                     if (targetSurface) {
                         SDL_Texture* targetTexture = SDL_CreateTextureFromSurface(renderer, targetSurface);
                          // Position Target below Score
-                        SDL_Rect targetRect = {20, 10 + (scoreSurface ? scoreSurface->h : 25) + 5, targetSurface->w, targetSurface->h};
+                        SDL_Rect targetRect = {80, 50, targetSurface->w, targetSurface->h};
                         SDL_RenderCopy(renderer, targetTexture, nullptr, &targetRect);
                         SDL_DestroyTexture(targetTexture); SDL_FreeSurface(targetSurface);
                     }
@@ -404,25 +445,14 @@ int main(int argc, char* argv[]) {
                 // Add text overlay explaining controls
                 if (font) {
                     SDL_Color textColor = {255, 255, 255, 255};
-                    const char* line1 = "Swing the rope automatically.";
-                    const char* line2 = "Press SPACE to drop the hook.";
-                    const char* line3 = "Collect gold and avoid stones!";
-                    const char* line4 = "Reach the target score before time runs out.";
-                    const char* line5 = "Press Enter/Escape/Space or Click to return.";
+                    const char* line1 = " ";
 
                     SDL_Surface* surf1 = TTF_RenderText_Blended(font, line1, textColor);
-                    SDL_Surface* surf2 = TTF_RenderText_Blended(font, line2, textColor);
-                    SDL_Surface* surf3 = TTF_RenderText_Blended(font, line3, textColor);
-                    SDL_Surface* surf4 = TTF_RenderText_Blended(font, line4, textColor);
-                    SDL_Surface* surf5 = TTF_RenderText_Blended(font, line5, textColor);
 
                     // Simple centered layout for text
                     int yPos = SCREEN_HEIGHT / 2 - 60;
                     if(surf1) { SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf1); SDL_Rect r = {SCREEN_WIDTH/2 - surf1->w/2, yPos, surf1->w, surf1->h}; SDL_RenderCopy(renderer, tex, NULL, &r); SDL_DestroyTexture(tex); SDL_FreeSurface(surf1); yPos += r.h + 5; }
-                    if(surf2) { SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf2); SDL_Rect r = {SCREEN_WIDTH/2 - surf2->w/2, yPos, surf2->w, surf2->h}; SDL_RenderCopy(renderer, tex, NULL, &r); SDL_DestroyTexture(tex); SDL_FreeSurface(surf2); yPos += r.h + 5; }
-                    if(surf3) { SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf3); SDL_Rect r = {SCREEN_WIDTH/2 - surf3->w/2, yPos, surf3->w, surf3->h}; SDL_RenderCopy(renderer, tex, NULL, &r); SDL_DestroyTexture(tex); SDL_FreeSurface(surf3); yPos += r.h + 5; }
-                    if(surf4) { SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf4); SDL_Rect r = {SCREEN_WIDTH/2 - surf4->w/2, yPos, surf4->w, surf4->h}; SDL_RenderCopy(renderer, tex, NULL, &r); SDL_DestroyTexture(tex); SDL_FreeSurface(surf4); yPos += r.h + 20; } // Extra space before last line
-                    if(surf5) { SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf5); SDL_Rect r = {SCREEN_WIDTH/2 - surf5->w/2, yPos, surf5->w, surf5->h}; SDL_RenderCopy(renderer, tex, NULL, &r); SDL_DestroyTexture(tex); SDL_FreeSurface(surf5); }
+
                 }
                 break;
         }

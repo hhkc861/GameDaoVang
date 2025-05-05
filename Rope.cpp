@@ -10,7 +10,7 @@
 #endif
 
 // Constructor implementation
-Rope::Rope(int anchorX, int anchorY, int maxLen)
+Rope::Rope(SDL_Texture* tex, int thick, int anchorX, int anchorY, int maxLen)
     : GameObject(nullptr, anchorX, anchorY, 1, 0), // Base constructor: null texture, anchor point, width 1, initial height 0
       length(0),
       maxLength(maxLen),

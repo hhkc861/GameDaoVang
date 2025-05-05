@@ -7,15 +7,7 @@
 #include <SDL.h>
 #include <vector>       // Needed for function parameters (golds, stones)
 
-// Forward declare vector if only used in function signatures in header
-// #include <vector> // Include if using vector members, otherwise forward declare is better for compile times
-// class Gold; // Forward declaration
-// class Stone; // Forward declaration
-// template<typename T> class std::vector; // Forward declaration of vector template
-
-// using namespace std; // Avoid in headers
-
-class Rope : public GameObject {
+class Rope : public GameObject { // Inherits from GameObject
 public:
     int length;
     int maxLength;
@@ -32,21 +24,23 @@ public:
     double angleSpeed;           // Angular velocity (radians per update)
     double maxAngle;             // Maximum swing angle (radians) from vertical
     bool isSwinging;             // True if currently swinging, false if extending/retracting
-    int startX, startY;          // Anchor point coordinates (usually player's position)
+    int startX, startY;          // Anchor point coordinates (center of rotation)
 
-    // Constructor: Takes anchor point and max length. No texture needed.
-    Rope(int anchorX, int anchorY, int maxLen);
+    // Visual property
+    int thickness; // Store the thickness for rendering calculation
+
+    // !!!!! THIS IS THE CORRECT 5-ARGUMENT CONSTRUCTOR DECLARATION !!!!!
+    Rope(SDL_Texture* tex, int thick, int anchorX, int anchorY, int maxLen);
 
     // Methods
-    void setAnchor(int x, int y); // Update anchor point if player moved (not needed now)
+    void setAnchor(int x, int y); // Update anchor point
     void extend();                // Start extending the rope at the current angle
     void retract();               // Start retracting the rope (usually called internally)
 
     // Update handles all logic: swinging, extending, retracting, collision, collection
-    // Needs score and object vectors to modify them upon successful retraction
     void update(int& score, std::vector<Gold>& golds, std::vector<Stone>& stones);
 
-    // Override render to draw the rope line and attached object
+    // Override render to draw the rope using the texture and thickness
     void render(SDL_Renderer* renderer) const override;
 
     // Collision checks (called internally by update)
