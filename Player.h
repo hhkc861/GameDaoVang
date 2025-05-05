@@ -6,19 +6,12 @@
 
 class Player : public GameObject {
 public:
-    float speed;
-    float currentSpeed;
-    float acceleration;
-    float deceleration;
-    bool movingRight;
-    bool isMoving;
+    // No movement variables or methods needed for stationary player
 
     Player(SDL_Texture* tex, int x, int y, int w, int h);
-    void update();
-    void moveLeft();
-    void moveRight();
-    void stopMoving();
-    void render(SDL_Renderer* renderer) const override;
+
+    // Inherits render from GameObject
+    // No update() needed for stationary player
 };
 
-#endif
+#endif // PLAYER_H
