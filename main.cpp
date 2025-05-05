@@ -22,7 +22,7 @@
 
 using namespace std;
 
-const int ROPE_THICKNESS = 4;
+const int ROPE_THICKNESS = 8;
 
 enum GameState {
     MENU,

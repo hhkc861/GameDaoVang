@@ -26,19 +26,22 @@ Rope::Rope(SDL_Texture* tex, int thick, int anchorX, int anchorY, int maxLen)
       maxAngle(M_PI / 3.5),           // Max swing angle (e.g., ~51 degrees)
       isSwinging(true),               // Start in swinging state
       startX(anchorX),
-      startY(anchorY)
+      startY(anchorY),
+      thickness(thick)
 {
     // Ensure rect reflects the anchor point (used by base class render if it had a texture)
     rect.x = startX;
     rect.y = startY;
+    rect.w = thickness;
+    rect.h = 0;
 }
 
 // Method to update the anchor point (if player could move)
 void Rope::setAnchor(int x, int y) {
     startX = x;
     startY = y;
-    rect.x = x; // Update base rect if needed
-    rect.y = y;
+    rect.x = startX - thickness / 2;
+    rect.y = startY;
 }
 
 // Method to initiate rope extension
@@ -173,25 +176,85 @@ void Rope::update(int& score, std::vector<Gold>& golds, std::vector<Stone>& ston
 
 // Render the rope and any attached object
 void Rope::render(SDL_Renderer* renderer) const {
-    // Determine the length to draw
+    // Xác định chiều dài để vẽ
     int drawLength = length;
     if (isSwinging) {
-        // Optionally draw a small stub or visual indicator even when length is 0
-         drawLength = 20; // Example: Draw a short line of length 20 while swinging
+        // Vẫn vẽ một đoạn ngắn khi đang đu đưa để thấy dây
+        drawLength = 30;
     }
 
-    // Calculate the end point based on angle and drawLength
-    int endX = startX + static_cast<int>(drawLength * sin(angle));
-    int endY = startY + static_cast<int>(drawLength * cos(angle));
+    // Nếu chiều dài vẽ quá ngắn, không cần vẽ nhiều đường phức tạp
+    if (drawLength < 1) {
+        // Có thể chọn không vẽ gì, hoặc vẽ một dấu chấm/đường ngắn tại điểm neo
+        if (thickness > 0) { // Chỉ vẽ nếu có độ dày
+             SDL_SetRenderDrawColor(renderer, 139, 69, 19, 255); // Màu nâu
+             // Vẽ một đường dọc ngắn tại điểm neo với độ dày mong muốn
+             int halfThickFloor = thickness / 2;
+             int startDrawX = startX - halfThickFloor;
+             SDL_Rect thickAnchorRect = {startDrawX, startY, thickness, 2}; // Hình chữ nhật nhỏ dày
+             SDL_RenderFillRect(renderer, &thickAnchorRect); // Vẽ hình chữ nhật này
+        }
+        // Vẫn render vật thể đính kèm ngay cả khi dây bằng 0 (nó sẽ ở điểm neo)
+        if (attachedGold != nullptr) attachedGold->render(renderer);
+        if (attachedStone != nullptr) attachedStone->render(renderer);
+        return; // Kết thúc render sớm
+    }
 
-    // Set color for the rope line (e.g., brown)
-    SDL_SetRenderDrawColor(renderer, 139, 69, 19, 255); // Brown color
+    // Tính toán điểm cuối dựa trên góc và chiều dài vẽ
+    // Sử dụng double cho tính toán trung gian để chính xác hơn
+    double endX_d = static_cast<double>(startX) + drawLength * sin(angle);
+    double endY_d = static_cast<double>(startY) + drawLength * cos(angle);
 
-    // Draw the line from anchor (startX, startY) to (endX, endY)
-    SDL_RenderDrawLine(renderer, startX, startY, endX, endY);
+    // Vector hướng của dây
+    double dx = endX_d - startX;
+    double dy = endY_d - startY;
 
-    // Render the attached object if there is one
-    // Its position should already be updated in the update() method
+    // Độ dài (khoảng cách) thực tế của đoạn dây vẽ
+    double magnitude = std::sqrt(dx * dx + dy * dy);
+
+    // Đặt màu vẽ cho dây
+    SDL_SetRenderDrawColor(renderer, 139, 69, 19, 255); // Màu nâu
+
+    // Xử lý trường hợp dây quá ngắn hoặc điểm đầu cuối trùng nhau (tránh chia cho 0)
+    if (magnitude < 0.001) {
+         // Vẽ một đường dọc ngắn tại điểm neo như trường hợp drawLength < 1
+         if (thickness > 0) {
+            int halfThickFloor = thickness / 2;
+            int startDrawX = startX - halfThickFloor;
+            SDL_Rect thickAnchorRect = {startDrawX, startY, thickness, std::max(1, drawLength)}; // Dài tối thiểu 1 px
+            SDL_RenderFillRect(renderer, &thickAnchorRect);
+         }
+    } else {
+        // Tính toán vector pháp tuyến đơn vị (vuông góc với dây)
+        // Vector vuông góc: (-dy, dx)
+        // Vector pháp tuyến đơn vị: (-dy/magnitude, dx/magnitude)
+        double perpX = -dy / magnitude;
+        double perpY = dx / magnitude;
+
+        // Tính toán vị trí bắt đầu lệch để các đường thẳng được căn giữa
+        // Ví dụ: thickness = 4 -> các đường ở vị trí -1.5, -0.5, +0.5, +1.5 so với đường trung tâm
+        double startOffsetFactor = -(static_cast<double>(thickness) - 1.0) / 2.0;
+
+        // Vẽ 'thickness' đường thẳng song song
+        for (int i = 0; i < thickness; ++i) {
+            // Tính độ lệch (offset) cho đường thẳng hiện tại so với đường trung tâm
+            double currentOffsetFactor = startOffsetFactor + i;
+            double offsetX = perpX * currentOffsetFactor;
+            double offsetY = perpY * currentOffsetFactor;
+
+            // Tính tọa độ điểm đầu và cuối của đường thẳng song song này
+            // Sử dụng round() để làm tròn tới số nguyên gần nhất, giúp các đường thẳng đều hơn
+            int lineStartX = static_cast<int>(std::round(startX + offsetX));
+            int lineStartY = static_cast<int>(std::round(startY + offsetY));
+            int lineEndX = static_cast<int>(std::round(endX_d + offsetX));
+            int lineEndY = static_cast<int>(std::round(endY_d + offsetY));
+
+            // Vẽ đường thẳng
+            SDL_RenderDrawLine(renderer, lineStartX, lineStartY, lineEndX, lineEndY);
+        }
+    }
+
+    // Render vật thể đính kèm (nếu có) - vị trí đã được cập nhật trong hàm update()
     if (attachedGold != nullptr) {
         attachedGold->render(renderer);
     }
@@ -235,7 +298,7 @@ Stone* Rope::checkCollision(std::vector<Stone>& stones) {
     int endY = startY + static_cast<int>(length * cos(angle));
 
     // Define a small rectangle around the rope tip
-    SDL_Rect ropeTipRect = {endX - 5, endY - 5, 10, 10};
+    SDL_Rect ropeTipRect = {endX - 5, endY - 5, 20, 10};
 
     // Iterate through stone objects and check for intersection
     for (Stone& stone : stones) {
