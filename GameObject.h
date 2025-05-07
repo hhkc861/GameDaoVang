@@ -9,9 +9,8 @@ public:
     SDL_Rect rect;
 
     GameObject(SDL_Texture* tex, int x, int y, int w, int h);
-    virtual ~GameObject() = default; // Good practice to have a virtual destructor
+    virtual ~GameObject() = default;
     virtual void render(SDL_Renderer* renderer) const;
-    // Keep update virtual in case subclasses need it, even if Player doesn't anymore
     virtual void update() {};
 };
 

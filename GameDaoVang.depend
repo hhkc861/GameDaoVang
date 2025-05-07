@@ -1,12 +1,12 @@
 # depslib dependency file v1.0
-1746433719 source:d:\codeblocks\gamedaovang\gameobject.cpp
+1746632233 source:d:\codeblocks\gamedaovang\gameobject.cpp
 	"GameObject.h"
 	<iostream>
 
-1746433719 d:\codeblocks\gamedaovang\gameobject.h
+1746638110 d:\codeblocks\gamedaovang\gameobject.h
 	<SDL.h>
 
-1746433719 source:d:\codeblocks\gamedaovang\gold.cpp
+1746632233 source:d:\codeblocks\gamedaovang\gold.cpp
 	"Gold.h"
 	"constants.h"
 	<cstdlib>
@@ -18,7 +18,7 @@
 	<SDL.h>
 	<vector>
 
-1746441774 source:d:\codeblocks\gamedaovang\main.cpp
+1746632233 source:d:\codeblocks\gamedaovang\main.cpp
 	"GameObject.h"
 	"Gold.h"
 	"Stone.h"
@@ -53,7 +53,7 @@
 	"Player.h"
 	"constants.h"
 
-1746441064 source:d:\codeblocks\gamedaovang\rope.cpp
+1746632233 source:d:\codeblocks\gamedaovang\rope.cpp
 	"Rope.h"
 	"constants.h"
 	<cmath>
