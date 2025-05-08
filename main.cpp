@@ -336,46 +336,9 @@ int main(int argc, char* argv[]) {
                  if (noButtonTexture) SDL_RenderCopy(renderer, noButtonTexture, NULL, &noButtonRect);
                  break;
 
-            case INSTRUCTIONS:
-                if (introTexture) SDL_RenderCopy(renderer, introTexture, NULL, NULL);
-                if (font) {
-                    SDL_Color textColor = {255, 255, 255, 255}; // White text
-                    SDL_Color shadowColor = {0, 0, 0, 255};     // Black shadow
-
-                    const char* lines[] = {
-                        " "
-                    };
-                    int num_lines = sizeof(lines) / sizeof(lines[0]);
-                    int yPos = 60; // Initial Y position
-
-                    for (int i = 0; i < num_lines; ++i) {
-                        if (strlen(lines[i]) > 0) { // Only render non-empty lines
-                            // Render shadow first
-                            SDL_Surface* surfShadow = TTF_RenderText_Blended(font, lines[i], shadowColor);
-                            if (surfShadow) {
-                                SDL_Texture* texShadow = SDL_CreateTextureFromSurface(renderer, surfShadow);
-                                SDL_Rect rShadow = {SCREEN_WIDTH / 2 - surfShadow->w / 2 + 1, yPos + 1, surfShadow->w, surfShadow->h}; // Offset for shadow
-                                SDL_RenderCopy(renderer, texShadow, NULL, &rShadow);
-                                SDL_DestroyTexture(texShadow);
-                                SDL_FreeSurface(surfShadow);
-                            }
-
-                            // Render actual text
-                            SDL_Surface* surfText = TTF_RenderText_Blended(font, lines[i], textColor);
-                            if (surfText) {
-                                SDL_Texture* texText = SDL_CreateTextureFromSurface(renderer, surfText);
-                                SDL_Rect rText = {SCREEN_WIDTH / 2 - surfText->w / 2, yPos, surfText->w, surfText->h};
-                                SDL_RenderCopy(renderer, texText, NULL, &rText);
-                                SDL_DestroyTexture(texText);
-                                SDL_FreeSurface(surfText);
-                                yPos += rText.h + 5; // Move Y position for next line
-                            } else {
-                                yPos += TTF_FontHeight(font) + 5; // Fallback line height
-                            }
-                        } else {
-                             yPos += (TTF_FontHeight(font) / 2) + 5; // Smaller gap for empty lines
-                        }
-                    }
+            case INSTRUCTIONS: // <<< BẮT ĐẦU THAY ĐỔI TẠI ĐÂY
+                if (introTexture) {
+                    SDL_RenderCopy(renderer, introTexture, NULL, NULL); // Chỉ hiển thị ảnh này
                 }
                 break;
         }
