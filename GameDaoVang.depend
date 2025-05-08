@@ -6,19 +6,19 @@
 1746638110 d:\codeblocks\gamedaovang\gameobject.h
 	<SDL.h>
 
-1746632233 source:d:\codeblocks\gamedaovang\gold.cpp
+1746638109 source:d:\codeblocks\gamedaovang\gold.cpp
 	"Gold.h"
 	"constants.h"
 	<cstdlib>
 	<vector>
 	<iostream>
 
-1746433719 d:\codeblocks\gamedaovang\gold.h
+1746638107 d:\codeblocks\gamedaovang\gold.h
 	"GameObject.h"
 	<SDL.h>
 	<vector>
 
-1746632233 source:d:\codeblocks\gamedaovang\main.cpp
+1746663613 source:d:\codeblocks\gamedaovang\main.cpp
 	"GameObject.h"
 	"Gold.h"
 	"Stone.h"
@@ -38,22 +38,22 @@
 	<algorithm>
 	<cmath>
 
-1746433719 d:\codeblocks\gamedaovang\player.h
+1746638098 d:\codeblocks\gamedaovang\player.h
 	"GameObject.h"
 	<SDL.h>
 
-1746440194 d:\codeblocks\gamedaovang\rope.h
+1746638104 d:\codeblocks\gamedaovang\rope.h
 	"GameObject.h"
 	"Gold.h"
 	"Stone.h"
 	<SDL.h>
 	<vector>
 
-1746433719 source:d:\codeblocks\gamedaovang\player.cpp
+1746638067 source:d:\codeblocks\gamedaovang\player.cpp
 	"Player.h"
 	"constants.h"
 
-1746632233 source:d:\codeblocks\gamedaovang\rope.cpp
+1746638106 source:d:\codeblocks\gamedaovang\rope.cpp
 	"Rope.h"
 	"constants.h"
 	<cmath>
@@ -61,14 +61,14 @@
 	<algorithm>
 	<iostream>
 
-1746433719 source:d:\codeblocks\gamedaovang\stone.cpp
+1746638103 source:d:\codeblocks\gamedaovang\stone.cpp
 	"Stone.h"
 	"constants.h"
 	<cstdlib>
 	<vector>
 	<iostream>
 
-1746433719 d:\codeblocks\gamedaovang\stone.h
+1746638101 d:\codeblocks\gamedaovang\stone.h
 	"GameObject.h"
 	<SDL.h>
 	<vector>
