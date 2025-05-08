@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
     SDL_Texture* noButtonTexture = loadTexture(renderer, "no.png");
     SDL_Texture* instructionsButtonTexture = loadTexture(renderer, "instructions.png");
     SDL_Texture* introTexture = loadTexture(renderer, "intro.jpg");
-    SDL_Texture* backButtonTexture = loadTexture(renderer, "back.png"); // <<< ADDED: Load back button texture
+    SDL_Texture* backButtonTexture = loadTexture(renderer, "back.png");
     Mix_Music* backgroundMusic = loadMusic("background_music.mp3");
 
     int playerWidth = 76;
@@ -176,7 +176,7 @@ int main(int argc, char* argv[]) {
             stones.push_back(newStone);
         }
 
-        targetScore = max(100, static_cast<int>(round(totalGoldValue * 2.0 / 3.0))); // Use 2.0/3.0 for float division
+        targetScore = max(100, static_cast<int>(round(totalGoldValue * 2.0 / 3.0)));
 
         gameState = PLAYING;
     };
@@ -381,7 +381,7 @@ int main(int argc, char* argv[]) {
         }
 
         SDL_RenderPresent(renderer);
-        SDL_Delay(16); // Cap framerate roughly to 60 FPS
+        SDL_Delay(16);
     }
 
     SDL_DestroyTexture(playerTexture);
@@ -396,7 +396,7 @@ int main(int argc, char* argv[]) {
     SDL_DestroyTexture(noButtonTexture);
     SDL_DestroyTexture(instructionsButtonTexture);
     SDL_DestroyTexture(introTexture);
-    SDL_DestroyTexture(backButtonTexture); // <<< ADDED: Destroy back button texture
+    SDL_DestroyTexture(backButtonTexture);
     SDL_DestroyTexture(ropeSegmentTexture);
 
 

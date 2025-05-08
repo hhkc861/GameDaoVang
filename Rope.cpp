@@ -18,7 +18,7 @@ Rope::Rope(SDL_Texture* tex, int thick, int anchorX, int anchorY, int maxLen)
       attachedStone(nullptr),
       angle(0.0),
       angleSpeed(0.025),
-      maxAngle(M_PI / 3.5),
+      maxAngle(M_PI / 2.5),
       isSwinging(true),
       startX(anchorX),
       startY(anchorY),
@@ -42,7 +42,7 @@ void Rope::extend() {
     if (isSwinging && !isExtending && !isRetracting) {
         isExtending = true;
         isRetracting = false;
-        isSwinging = false; // Stop swinging
+        isSwinging = false;
         length = 0;         // Start extension from length 0
     }
 }
@@ -65,9 +65,11 @@ void Rope::update(int& score, std::vector<Gold>& golds, std::vector<Stone>& ston
         attachedStone = nullptr;
 
     } else if (isExtending) {
-        length += extendSpeed;
-        int endX = startX + static_cast<int>(length * sin(angle));
-        int endY = startY + static_cast<int>(length * cos(angle));
+        length += extendSpeed; // Tăng chiều dài dây theo tốc độ vươn
+        // Tính tọa độ đầu dây (endX, endY) dựa trên góc và chiều dài
+        int endX = startX + static_cast<int>(length * sin(angle)); // X = startX + length * sin(góc)
+        int endY = startY + static_cast<int>(length * cos(angle)); // Y = startY + length * cos(góc)
+                                                                  // (cos cho Y vì góc 0 là thẳng xuống)
         bool hitBoundary = (endY >= SCREEN_HEIGHT || endX <= 0 || endX >= SCREEN_WIDTH || length >= maxLength);
 
         if (hitBoundary) {
@@ -150,12 +152,13 @@ void Rope::render(SDL_Renderer* renderer) const {
         return; // Kết thúc render sớm
     }
 
+    // Tính tọa độ điểm cuối của dây (kiểu double để chính xác hơn)
     double endX_d = static_cast<double>(startX) + drawLength * sin(angle);
     double endY_d = static_cast<double>(startY) + drawLength * cos(angle);
 
-    // Vector hướng của dây
-    double dx = endX_d - startX;
-    double dy = endY_d - startY;
+    // Vector hướng của dây (từ điểm đầu đến điểm cuối)
+    double dx = endX_d - startX; // Thay đổi theo trục X
+    double dy = endY_d - startY; // Thay đổi theo trục Y
 
     double magnitude = std::sqrt(dx * dx + dy * dy);
 
@@ -169,18 +172,23 @@ void Rope::render(SDL_Renderer* renderer) const {
             SDL_RenderFillRect(renderer, &thickAnchorRect);
          }
     } else {
-        double perpX = -dy / magnitude;
-        double perpY = dx / magnitude;
+        // Tính vector pháp tuyến (vuông góc với vector hướng của dây) để tạo độ dày
+        double perpX = -dy / magnitude; // Component X của vector pháp tuyến đơn vị
+        double perpY = dx / magnitude;  // Component Y của vector pháp tuyến đơn vị
 
+        // Tính toán offset để các đường song song tạo thành độ dày được căn giữa
         double startOffsetFactor = -(static_cast<double>(thickness) - 1.0) / 2.0;
 
         for (int i = 0; i < thickness; ++i) {
-            double currentOffsetFactor = startOffsetFactor + i;
+             double currentOffsetFactor = startOffsetFactor + i; // Offset cho đường thẳng hiện tại
+            // Tính toán độ lệch (offset) dựa trên vector pháp tuyến và offset factor
             double offsetX = perpX * currentOffsetFactor;
             double offsetY = perpY * currentOffsetFactor;
 
+              // Tọa độ bắt đầu của đường thẳng (sợi dây) hiện tại, đã áp dụng offset
             int lineStartX = static_cast<int>(std::round(startX + offsetX));
             int lineStartY = static_cast<int>(std::round(startY + offsetY));
+            // Tọa độ kết thúc của đường thẳng (sợi dây) hiện tại, đã áp dụng offset
             int lineEndX = static_cast<int>(std::round(endX_d + offsetX));
             int lineEndY = static_cast<int>(std::round(endY_d + offsetY));
 
@@ -219,6 +227,7 @@ Stone* Rope::checkCollision(std::vector<Stone>& stones) {
 
     if (!isExtending) return nullptr;
 
+    //toạ độ đầu dây
     int endX = startX + static_cast<int>(length * sin(angle));
     int endY = startY + static_cast<int>(length * cos(angle));
 
